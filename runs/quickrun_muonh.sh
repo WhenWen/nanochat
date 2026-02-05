@@ -16,12 +16,12 @@ set -e
 # -----------------------------------------------------------------------------
 # Config
 
-DEPTH="${DEPTH:-24}"
+DEPTH="${DEPTH:-26}"
 NUM_SHARDS="${NUM_SHARDS:-370}"      # default for d24 @ ratio~11
-TARGET_RATIO="${TARGET_RATIO:-11}"
+TARGET_RATIO="${TARGET_RATIO:-8.25}"
 WINDOW_PATTERN="${WINDOW_PATTERN:-SSSL}"
 DEVICE_BATCH_SIZE="${DEVICE_BATCH_SIZE:-16}"
-TOTAL_BATCH_SIZE="${TOTAL_BATCH_SIZE:-524288}"
+TOTAL_BATCH_SIZE="${TOTAL_BATCH_SIZE:--1}"  # -1 = auto-compute optimal (Power Lines paper)
 
 NPROC_PER_NODE="${NPROC_PER_NODE:-$(nvidia-smi -L 2>/dev/null | wc -l || echo 1)}"
 if [ "$NPROC_PER_NODE" -eq 0 ]; then
@@ -38,10 +38,12 @@ MATRIX_WARMDOWN_RATIO="${MATRIX_WARMDOWN_RATIO:-1.0}"
 # AdamW
 EMBEDDING_LR="${EMBEDDING_LR:-0.3}"
 UNEMBEDDING_LR="${UNEMBEDDING_LR:-0.004}"
+NORM_LR="${NORM_LR:-0.1}"
 
 # Wandb
-WANDB_PROJECT="nanochat"
-WANDB_RUN="${WANDB_RUN:-muonh_d${DEPTH}_ratio${TARGET_RATIO}}"
+export WANDB_ENTITY="xingyu20"
+export WANDB_PROJECT="nanochat"
+WANDB_RUN="${WANDB_RUN:-muonh_d${DEPTH}_ratio${TARGET_RATIO}_normlr${NORM_LR}_final}"
 MODEL_TAG="${MODEL_TAG:-d${DEPTH}_gamma_muonh}"
 
 # FP8 (default enabled)
@@ -81,6 +83,7 @@ echo "Device batch size: $DEVICE_BATCH_SIZE"
 echo "Total batch size:  $TOTAL_BATCH_SIZE"
 echo "Matrix optimizer:  $MATRIX_OPTIMIZER"
 echo "Matrix LR:         $MATRIX_LR"
+echo "Norm LR:           $NORM_LR"
 echo "Adam LRs:          embedding=$EMBEDDING_LR, unembedding=$UNEMBEDDING_LR, scalar=$SCALAR_LR"
 echo "Warmdown ratio:    adam=$WARMDOWN_RATIO, matrix=$MATRIX_WARMDOWN_RATIO"
 echo "Wandb run:         $WANDB_RUN"
@@ -134,6 +137,7 @@ TRAIN_ARGS=(
     --matrix-warmdown-ratio=$MATRIX_WARMDOWN_RATIO
     --embedding-lr=$EMBEDDING_LR
     --unembedding-lr=$UNEMBEDDING_LR
+    --norm-lr=$NORM_LR
     --scalar-lr=$SCALAR_LR
     --core-metric-every=2000
     --sample-every=-1

@@ -64,6 +64,7 @@ parser.add_argument("--weight-decay", type=float, default=0.2, help="cautious we
 parser.add_argument("--matrix-lr", type=float, default=0.02, help="learning rate for matrix parameters (Muon/Hyperball)")
 parser.add_argument("--matrix-optimizer", type=str, default="muon", choices=["muon", "hyperball"], help="optimizer for matrix parameters")
 parser.add_argument("--scalar-lr", type=float, default=0.5, help="learning rate for scalars (resid_lambdas, x0_lambdas)")
+parser.add_argument("--norm-lr", type=float, default=0.1, help="learning rate for norm/gamma parameters")
 parser.add_argument("--adam-beta1", type=float, default=0.8, help="Adam beta1 for embedding/unembedding")
 parser.add_argument("--adam-beta2", type=float, default=0.95, help="Adam beta2 for embedding/unembedding")
 parser.add_argument("--warmup-ratio", type=float, default=0.0, help="ratio of iterations for LR warmup")
@@ -335,6 +336,7 @@ optimizer = model.setup_optimizer(
     weight_decay=weight_decay_scaled,
     adam_betas=adam_betas,
     scalar_lr=args.scalar_lr * batch_lr_scale,
+    norm_lr=args.norm_lr * batch_lr_scale,
     matrix_optimizer=args.matrix_optimizer,
 )
 
