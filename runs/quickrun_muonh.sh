@@ -16,9 +16,9 @@ set -e
 # -----------------------------------------------------------------------------
 # Config
 
-DEPTH="${DEPTH:-26}"
+DEPTH="${DEPTH:-12}"
 NUM_SHARDS="${NUM_SHARDS:-370}"      # default for d24 @ ratio~11
-TARGET_RATIO="${TARGET_RATIO:-8.25}"
+TARGET_RATIO="${TARGET_RATIO:-10.5}"
 WINDOW_PATTERN="${WINDOW_PATTERN:-SSSL}"
 DEVICE_BATCH_SIZE="${DEVICE_BATCH_SIZE:-16}"
 TOTAL_BATCH_SIZE="${TOTAL_BATCH_SIZE:--1}"  # -1 = auto-compute optimal (Power Lines paper)
@@ -31,9 +31,9 @@ fi
 # Optimizer
 MATRIX_OPTIMIZER="${MATRIX_OPTIMIZER:-hyperball}"
 SCALAR_LR="${SCALAR_LR:-0.5}"
-MATRIX_LR="${MATRIX_LR:-0.025}"
+MATRIX_LR="${MATRIX_LR:-0.02}"
 WARMDOWN_RATIO="${WARMDOWN_RATIO:-0.3}"
-MATRIX_WARMDOWN_RATIO="${MATRIX_WARMDOWN_RATIO:-1.0}"
+MATRIX_WARMDOWN_RATIO="${MATRIX_WARMDOWN_RATIO:-0.9}"
 
 # AdamW
 EMBEDDING_LR="${EMBEDDING_LR:-0.3}"
@@ -43,7 +43,7 @@ NORM_LR="${NORM_LR:-0.1}"
 # Wandb
 export WANDB_ENTITY="xingyu20"
 export WANDB_PROJECT="nanochat"
-WANDB_RUN="${WANDB_RUN:-muonh_d${DEPTH}_ratio${TARGET_RATIO}_normlr${NORM_LR}_final}"
+WANDB_RUN="${WANDB_RUN:-muonh_d${DEPTH}_ratio${TARGET_RATIO}_matrix_down${MATRIX_WARMDOWN_RATIO}}"
 MODEL_TAG="${MODEL_TAG:-d${DEPTH}_gamma_muonh}"
 
 # FP8 (default enabled)
