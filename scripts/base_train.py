@@ -324,10 +324,10 @@ matrix_lr_scaled = args.matrix_lr * batch_lr_scale
 
 # LR scaling (data scaling)
 if args.matrix_optimizer == "hyperball":
-    # create a reference depth
-    data_ratio = D_REF / target_tokens 
-    matrix_lr_scaled = matrix_lr_scaled * (data_ratio ** 0.25)
-    print0(f"Scaling hyperball LR from {args.matrix_lr * batch_lr_scale:.6f} to {matrix_lr_scaled:.6f} for data ratio {data_ratio:.4f}")
+    # data_ratio = D_REF / target_tokens 
+    depth_ratio = 12 / args.depth
+    matrix_lr_scaled = matrix_lr_scaled * (depth_ratio)
+    print0(f"Scaling hyperball LR from {args.matrix_lr * batch_lr_scale:.6f} to {matrix_lr_scaled:.6f} for depth ratio {depth_ratio:.4f}")
 
 optimizer = model.setup_optimizer(
     unembedding_lr=args.unembedding_lr * batch_lr_scale,

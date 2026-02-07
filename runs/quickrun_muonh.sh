@@ -43,7 +43,7 @@ NORM_LR="${NORM_LR:-0.1}"
 # Wandb
 export WANDB_ENTITY="xingyu20"
 export WANDB_PROJECT="nanochat"
-WANDB_RUN="${WANDB_RUN:-muonh_d${DEPTH}_ratio${TARGET_RATIO}_matrix_down${MATRIX_WARMDOWN_RATIO}}"
+WANDB_RUN="${WANDB_RUN:-muonh_d${DEPTH}_ratio${TARGET_RATIO}_matrix_down${MATRIX_WARMDOWN_RATIO}_depthratio}"
 MODEL_TAG="${MODEL_TAG:-d${DEPTH}_gamma_muonh}"
 
 # FP8 (default enabled)
