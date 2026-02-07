@@ -16,9 +16,9 @@ set -e
 # -----------------------------------------------------------------------------
 # Config
 
-DEPTH="${DEPTH:-24}"
+DEPTH="${DEPTH:-26}"
 NUM_SHARDS="${NUM_SHARDS:-400}"      # default for d24 @ ratio~11
-TARGET_RATIO="${TARGET_RATIO:-12}"
+TARGET_RATIO="${TARGET_RATIO:-8.25}"
 WINDOW_PATTERN="${WINDOW_PATTERN:-SSSL}"
 DEVICE_BATCH_SIZE="${DEVICE_BATCH_SIZE:-16}"
 TOTAL_BATCH_SIZE="${TOTAL_BATCH_SIZE:--1}"  # -1 = auto-compute optimal (Power Lines paper)
