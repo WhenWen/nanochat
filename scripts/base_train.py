@@ -322,11 +322,11 @@ if args.depth != 12:
 adam_betas = (args.adam_beta1, args.adam_beta2)
 matrix_lr_scaled = args.matrix_lr * batch_lr_scale
 
-# LR scaling (mostly data scaling instead of depth scaling)
+# LR scaling (data scaling)
 if args.matrix_optimizer == "hyperball":
     # create a reference depth
     data_ratio = D_REF / target_tokens 
-    matrix_lr_scaled = matrix_lr_scaled * math.sqrt(data_ratio)
+    matrix_lr_scaled = matrix_lr_scaled * (data_ratio ** 0.25)
     print0(f"Scaling hyperball LR from {args.matrix_lr * batch_lr_scale:.6f} to {matrix_lr_scaled:.6f} for data ratio {data_ratio:.4f}")
 
 optimizer = model.setup_optimizer(
