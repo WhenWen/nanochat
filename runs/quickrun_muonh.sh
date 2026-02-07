@@ -16,9 +16,9 @@ set -e
 # -----------------------------------------------------------------------------
 # Config
 
-DEPTH="${DEPTH:-12}"
-NUM_SHARDS="${NUM_SHARDS:-370}"      # default for d24 @ ratio~11
-TARGET_RATIO="${TARGET_RATIO:-10.5}"
+DEPTH="${DEPTH:-24}"
+NUM_SHARDS="${NUM_SHARDS:-400}"      # default for d24 @ ratio~11
+TARGET_RATIO="${TARGET_RATIO:-12}"
 WINDOW_PATTERN="${WINDOW_PATTERN:-SSSL}"
 DEVICE_BATCH_SIZE="${DEVICE_BATCH_SIZE:-16}"
 TOTAL_BATCH_SIZE="${TOTAL_BATCH_SIZE:--1}"  # -1 = auto-compute optimal (Power Lines paper)
@@ -33,7 +33,7 @@ MATRIX_OPTIMIZER="${MATRIX_OPTIMIZER:-hyperball}"
 SCALAR_LR="${SCALAR_LR:-0.5}"
 MATRIX_LR="${MATRIX_LR:-0.02}"
 WARMDOWN_RATIO="${WARMDOWN_RATIO:-0.3}"
-MATRIX_WARMDOWN_RATIO="${MATRIX_WARMDOWN_RATIO:-0.9}"
+MATRIX_WARMDOWN_RATIO="${MATRIX_WARMDOWN_RATIO:-1.0}"
 
 # AdamW
 EMBEDDING_LR="${EMBEDDING_LR:-0.3}"
