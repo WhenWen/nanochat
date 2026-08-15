@@ -37,6 +37,9 @@ class GPTConfig:
     # Characters: L=long (full context), S=short (quarter context)
     # Examples: "L"=all full context, "SL"=alternating, "SSL"=two short then one long
     window_pattern: str = "SSSL"
+    # Fixed-YOCO: upper-half attention layers reuse one midpoint residual as their K/V input.
+    # Queries and all other block computations continue to use the current residual stream.
+    fixed_yoco: bool = False
 
 
 def norm(x):
@@ -81,14 +84,14 @@ class CausalSelfAttention(nn.Module):
         self.ve_gate_channels = 12
         self.ve_gate = Linear(self.ve_gate_channels, self.n_kv_head, bias=False) if has_ve(layer_idx, config.n_layer) else None
 
-    def forward(self, x, ve, cos_sin, window_size, kv_cache):
+    def forward(self, x, kv_input, ve, cos_sin, window_size, kv_cache):
         B, T, C = x.size()
 
         # Project the input to get queries, keys, and values
         # Shape: (B, T, H, D) - FA3's native layout, no transpose needed!
         q = self.c_q(x).view(B, T, self.n_head, self.head_dim)
-        k = self.c_k(x).view(B, T, self.n_kv_head, self.head_dim)
-        v = self.c_v(x).view(B, T, self.n_kv_head, self.head_dim)
+        k = self.c_k(kv_input).view(B, T, self.n_kv_head, self.head_dim)
+        v = self.c_v(kv_input).view(B, T, self.n_kv_head, self.head_dim)
 
         # Value residual (ResFormer): mix in value embedding with input-dependent gate per head
         if ve is not None:
@@ -147,8 +150,10 @@ class Block(nn.Module):
         self.attn = CausalSelfAttention(config, layer_idx)
         self.mlp = MLP(config)
 
-    def forward(self, x, ve, cos_sin, window_size, kv_cache):
-        x = x + self.attn(norm(x), ve, cos_sin, window_size, kv_cache)
+    def forward(self, x, kv_source, ve, cos_sin, window_size, kv_cache):
+        attn_input = norm(x)
+        kv_input = attn_input if kv_source is None else norm(kv_source)
+        x = x + self.attn(attn_input, kv_input, ve, cos_sin, window_size, kv_cache)
         x = x + self.mlp(norm(x))
         return x
 
@@ -495,11 +500,16 @@ class GPT(nn.Module):
         x0 = x  # save initial normalized embedding for x0 residual
         n_layer = self.config.n_layer
         backout_layer = n_layer // 2  # cache at halfway point
+        kv_reuse_start_layer = (n_layer + 1) // 2
         x_backout = None
+        kv_source = None
         for i, block in enumerate(self.transformer.h):
             x = self.resid_lambdas[i] * x + self.x0_lambdas[i] * x0
             ve = self.value_embeds[str(i)](idx).to(x.dtype) if str(i) in self.value_embeds else None
-            x = block(x, ve, cos_sin, self.window_sizes[i], kv_cache)
+            block_kv_source = kv_source if self.config.fixed_yoco and i >= kv_reuse_start_layer else None
+            x = block(x, block_kv_source, ve, cos_sin, self.window_sizes[i], kv_cache)
+            if self.config.fixed_yoco and i == kv_reuse_start_layer - 1:
+                kv_source = x
             if i == backout_layer:
                 x_backout = x
         # Subtract mid-layer residual to remove low-level features before logit projection
